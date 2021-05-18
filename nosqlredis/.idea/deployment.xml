@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" autoUpload="Always" serverName="local">
+    <serverData>
+      <paths name="local">
+        <serverdata>
+          <mappings>
+            <mapping deploy="nosqlredis" local="$PROJECT_DIR$" web="/nosqlredis" />
+            <mapping local="" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="studium">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/nosqlredis" local="$PROJECT_DIR$" web="/nosqlredis" />
+            <mapping local="" />
+          </mappings>
+        </serverdata>
+      </paths>
+    </serverData>
+    <option name="myAutoUpload" value="ALWAYS" />
+  </component>
+</project>
