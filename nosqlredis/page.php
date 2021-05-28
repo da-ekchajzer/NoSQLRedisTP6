@@ -18,13 +18,13 @@ try {
 if (isset($_POST["userName"])) {
     $_SESSION["userName"] = $_POST["userName"];
     $redis->sadd("username", $_SESSION["userName"]);
-    $redis->set($_POST["userName"], "0");
+    $redis->setnx($_POST["userName"], "0");
 }
 
 if (isset($_POST["wordToPlay"])) {
     if (!$redis->exists("wordToPlay")) {
 
-        $redis->setnx("wordToPlay", $_POST["wordToPlay"]);
+        $redis->set("wordToPlay", $_POST["wordToPlay"]);
         $redis->expire("wordToPlay", 60);
         if ($redis->exists("propositions")) {
             $redis->del("propositions");
@@ -227,8 +227,8 @@ if ($redis->exists("propositions")) {
     setInterval(() => {
         let timeMax = parseInt(document.getElementById("ttl-word").innerText, 10);
         document.getElementById("ttl-word").innerText = (--timeMax).toString();
-        if (timeMax === 0) {
-            location.reload();
+        if (timeMax <= 0) {
+            window.location.href = "index.php";
         }
     }, 1000);
 </script>
