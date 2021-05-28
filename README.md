@@ -2,7 +2,8 @@
 
 ## How to play
 * Define the port on which you want to run the application (e.g. ```8043```)
-* Open a web brower at ```http://localhost:8043/connectionPage.php```
+* Open a web brower at ```http://localhost:8043/index.php```
+* Write a name to sign in 
 * Write a word to begin a game
 * During a game, you can propose :
   * letters

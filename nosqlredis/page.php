@@ -1,5 +1,6 @@
 <?php
-session_start();
+if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+
 //set predis
 require "predis/autoload.php";
 Predis\Autoloader::register();
@@ -141,85 +142,86 @@ if ($redis->exists("propositions")) {
 <nav class="navbar navbar-light bg-light">
     <span class="navbar-brand mb-0 h1">Le PeNdU</span>
     <span class="navbar-text">
-      Bonjour <?php echo $_SESSION["userName"]; ?>, ton score est <?php echo $redis->get($_SESSION["userName"]); ?> points !
+      Bonjour <?php echo $_SESSION["userName"]; ?>, ton score est de <?php echo $redis->get($_SESSION["userName"]); ?> point(s) !
     </span>
 </nav>
-<div class="row">
-    <div class="col-sm-3">
-        <h2>Liste des joueurs</h2>
-        <ul>
-            <?php
-            foreach ($players as $p) {
-                echo "<li>$p</li>";
-            }
-            ?>
-        </ul>
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm-3">
+            <h2>Liste des joueurs</h2>
+            <ul>
+                <?php
+                foreach ($players as $p) {
+                    echo "<li>$p</li>";
+                }
+                ?>
+            </ul>
+        </div>
     </div>
 
-    <div class="container">
-        <?php if ($redis->exists("wordToPlay")) { ?>
+    <?php if ($redis->exists("wordToPlay")) { ?>
 
-            <div class="row">
-                <div class="col-sm-6">
-                    <h2>Mot à trouver</h2>
-                    <span><?php echo getPartialWord($redis) ?></span>
-                </div>
-                <div class="col-sm-3">
-                    <h2>Propositions</h2>
-                    <ul>
-                        <?php foreach ($propal as $p) {
-                            echo "<li>$p</li>";
-                        } ?>
-                    </ul>
-                </div>
-                <div class="col-sm-6">
-                    <h2>Temps restant</h2>
-                    <span><span id="ttl-word"><?php echo $redis->ttl("wordToPlay") ?></span> secondes</span>
-                </div>
-                <div class="col-sm-6">
-                    <h2>Nombre d'essais restant</h2>
-                    <span><?php echo 10 - $redis->get("nbError") ?> essais</span>
-                </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <h2>Mot à trouver</h2>
+                <span><?php echo getPartialWord($redis) ?></span>
             </div>
+            <div class="col-sm-3">
+                <h2>Propositions</h2>
+                <ul>
+                    <?php foreach ($propal as $p) {
+                        echo "<li>$p</li>";
+                    } ?>
+                </ul>
+            </div>
+            <div class="col-sm-6">
+                <h2>Temps restant</h2>
+                <span><span id="ttl-word"><?php echo $redis->ttl("wordToPlay") ?></span> secondes</span>
+            </div>
+            <div class="col-sm-6">
+                <h2>Nombre d'essais restant</h2>
+                <span><?php echo 10 - $redis->get("nbError") ?> essais</span>
+            </div>
+        </div>
 
-            <div class="row">
-                <div class="col-sm-6">
-                    <h2>Proposer une lettre</h2>
-                    <form action="page.php" method="post">
+        <div class="row">
+            <div class="col-sm-6">
+                <h2>Proposer une lettre</h2>
+                <form action="page.php" method="post">
                         <span>
                             <input type="text" min="1" max="1" size="3" name="letterPropal" required/>
                             <button type="submit">Valider</button>
                         </span>
-                    </form>
-                </div>
-                <div class="col-sm-6">
-                    <h2>Proposer un mot</h2>
-                    <form action="page.php" method="post">
+                </form>
+            </div>
+            <div class="col-sm-6">
+                <h2>Proposer un mot</h2>
+                <form action="page.php" method="post">
                         <span>
                             <input type="text" min="1" size="20" name="wordPropal" required/>
                             <button type="submit">Valider</button>
                         </span>
-                    </form>
-                </div>
+                </form>
             </div>
+        </div>
 
 
-        <?php } else { ?>
+    <?php } else { ?>
 
-            <div class="row">
-                <div class="col-sm-6">
-                    <h2>Proposer un mot </h2>
-                    <form action="page.php" method="post">
+        <div class="row">
+            <div class="col-sm-6">
+                <h2>Proposer un mot </h2>
+                <form action="page.php" method="post">
                         <span>
                             <input type="text" size="30" name="wordToPlay"/>
                             <button type="submit">Valider</button>
                         </span>
-                    </form>
-                </div>
+                </form>
             </div>
+        </div>
 
-        <?php } ?>
-    </div>
+    <?php } ?>
 </div>
 <script>
     setInterval(() => {
