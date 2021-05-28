@@ -1,4 +1,5 @@
 <?php
+    session_start();
    //set predis
     require "predis/autoload.php";
     Predis\Autoloader::register();
@@ -16,21 +17,17 @@
     //player informations
     if(isset($_POST["userName"])){
         $_SESSION["userName"] = $_POST["userName"];
-        if(!$redis->exists("username")){
-            $redis->sadd("username");
-        }
         $redis->sadd("username", $_SESSION["userName"]);
-        $redis->set($_POST["userName"],0);
-        $players =  $redis->get("username");
+        $redis->set($_POST["userName"],"0");
     }
 
     if(isset($_POST["wordToPlay"])){
         if(!$redis->exists("wordToPlay")){
-            $redis->set("wordToPlay", $_POST["wordToPlay"], null, 60);
+
+            $redis->setex("wordToPlay", 60,  $_POST["wordToPlay"]);
             if($redis->exists("propositions")){
                 $redis->del("propositions");
             }
-            $redis->sadd("propositions");
 
             if($redis->exists("nbError")){
                 $redis->del("nbError");
@@ -40,7 +37,6 @@
     }
 
     if($redis->exists("wordToPlay")){
-        $propal = $redis->get("propositions");
         $isComplet = false;
 
         if(isset($_POST["letterPropal"])){
@@ -48,15 +44,13 @@
                 $redis->sadd("propositions", $_POST["letterPropal"]);
             }
 
-            $letterInWord = true;
-            foreach (str_split($redis->get("wordToPlay"),1) as $c){
-                if($_POST["letterPropal"] == $c){
+            $letterInWord = false;
+            foreach (str_split($redis->get("wordToPlay"),1) as $c) {
+                if ($_POST["letterPropal"] == $c) {
                     $letterInWord = true;
-                }else{
-                    $letterInWord = false;
+                    break;
                 }
             }
-            if($letterInWord)
 
             //as-t-il gagné ?
             foreach (str_split($redis->get("wordToPlay"),1) as $c){
@@ -84,6 +78,18 @@
 
         if($isComplet){
             //gagné
+
+            $redis->incr($_SESSION["userName"]);
+
+            if($redis->exists("propositions")){
+                $redis->del("propositions");
+            }
+
+            if($redis->exists("nbError")){
+                $redis->del("nbError");
+            }
+
+            $redis->del("wordToPlay");
         }
     }
 
@@ -101,7 +107,13 @@
         }
         return $show;
     }
+    $players =  $redis->smembers("username");
 
+    if($redis->exists("propositions")){
+        $propal = $redis->smembers("propositions");
+    }else{
+        $propal = array();
+    }
 ?>
 
 <!doctype html>
@@ -119,7 +131,7 @@
 <nav class="navbar navbar-light bg-light">
     <span class="navbar-brand mb-0 h1">Le PeNdU</span>
     <span class="navbar-text">
-      Bonjour <?php echo $_SESSION["userName"]?>, ton score est <?php $redis->get($_POST["userName"]); ?> points !
+      Bonjour <?php echo $_SESSION["userName"];?>, ton score est <?php echo $redis->get($_SESSION["userName"]); ?> points !
     </span>
 </nav>
 <div class="row">
